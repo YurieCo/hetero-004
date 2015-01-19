@@ -5,4 +5,5 @@ Matrix Mulitplication
 
 | Method | Size | Time |
 |--------|------| -----|
-|123     | 123  | 123123|
+| Naive  | 200*256  | 0.2515 ms |
+| Tiled  | 200*256 | 0.1127 ms |
