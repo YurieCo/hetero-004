@@ -1,7 +1,6 @@
-# hetero-004
-Heterogeneous Parallel Programming
+# Heterogeneous Parallel Programming
 
-Matrix Mulitplication
+### Matrix Mulitplication
 
 | Method | Size | Time |
 |--------|------| -----|
