@@ -2,7 +2,7 @@
 
 ### Matrix Mulitplication
 
-| Method | Size | Time |
-|--------|------| -----|
-| Naive  | 200*256  | 0.2515 ms |
-| Tiled  | 200*256 | 0.1127 ms |
+| Method | Matrix Size | Time |
+|:-------:|:------:|:-----:|
+| [Naive](Basic_Matrix_Multiplication.cu)  | 200*256 | 0.2515 ms |
+| [Tiled](Tiled_Matrix_Multiplication.cu)  | 200*256 | 0.1127 ms |
