@@ -24,6 +24,13 @@ __device__ float clamp(float v, float low, float high)
 	return v;
 }
 
+float clampCPU(float v, float low, float high)
+{
+	if(v<low) return low;
+	if(v>high) return high;
+	return v;
+}
+
 __global__ void convolution2D(float *I, float *O, const float *M, int w, int h, int channels)
 {
 	__shared__ float S[3][I_TILE_SIZE][I_TILE_SIZE];
@@ -65,6 +72,25 @@ __global__ void convolution2D(float *I, float *O, const float *M, int w, int h, 
 	
 	__syncthreads();
 }
+
+void convolution2DCPU(float *I, float *O, const float *M, int w, int h, int channels)
+{
+	for(int c=0;c<channels;c++)
+		for(int i=0;i<h;i++)
+			for(int j=0;j<w;j++)
+			{
+				float sum = 0.0;
+				for(int p=-Mask_radius;p<=Mask_radius;++p)
+					for(int q=-Mask_radius;q<=Mask_radius;++q)
+				{
+					int sy = i + p;
+					int sx = j + q;
+					if(sx<0 || sy<0 || sx>=w || sy>=h) continue;
+					sum += I[(sy*w+sx)*channels+c] * M[(p+Mask_radius)*Mask_width + (q+Mask_radius)];
+				}
+				O[(i*w+j)*channels+c] = clampCPU(sum,0.0f,1.0f);
+			}
+}	
 
 
 int main(int argc, char* argv[]) {
@@ -127,7 +153,15 @@ int main(int argc, char* argv[]) {
                cudaMemcpyHostToDevice);
     wbTime_stop(Copy, "Copying data to the GPU");
 
-
+	
+	wbTime_start(GPU, "Doing the computation on the CPU");
+	
+	convolution2DCPU(hostInputImageData, hostOutputImageData, hostMaskData, imageWidth, imageHeight, imageChannels);
+	
+	wbTime_stop(GPU, "Doing the computation on the CPU");
+	
+	
+	
     wbTime_start(Compute, "Doing the computation on the GPU");
     //@@ INSERT CODE HERE
 	
