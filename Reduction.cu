@@ -31,15 +31,6 @@ __global__ void total(float * input, float * output, int len) {
 
 	N[tx*2] = (start_index < len) ? input[start_index] : 0.0f;
 	N[tx*2+1] = (start_index+1 < len) ? input[start_index+1] : 0.0f;		
-
-/**	
-	for(int s=BLOCK_SIZE;s>=1;s/=2)
-	{
-		__syncthreads();
-		
-		N[tx*2] += N[tx*2 + s];		
-	}
-	**/
 	
 	__syncthreads();
 	
