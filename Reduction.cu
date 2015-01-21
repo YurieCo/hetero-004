@@ -23,15 +23,12 @@ __global__ void total(float * input, float * output, int len) {
 	int tx = threadIdx.x;
 	
 	int start_index = (bx * blockDim.x + tx)*2;
-	
 
 	N[tx*2] = (start_index < len) ? input[start_index] : 0.0f;
 	N[tx*2+1] = (start_index+1 < len) ? input[start_index+1] : 0.0f;		
-
 	
 	__syncthreads();
 
-	// only one thread do the computation...	
 	if(tx == 0)
 	{		
 		for(int i=1;i<BLOCK_SIZE*2;i++)
@@ -54,7 +51,6 @@ __global__ void total2(float * input, float * output, int len) {
 	N[tx*2+1] = (start_index+1 < len) ? input[start_index+1] : 0.0f;		
 	
 	__syncthreads();
-	
 	
 	for(int s=BLOCK_SIZE;s>=1;s/=2)
 	{
