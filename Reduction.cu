@@ -16,11 +16,32 @@
     } while(0)
 
 __global__ void total(float * input, float * output, int len) {
-    //@@ Load a segment of the input vector into shared memory
-    //@@ Traverse the reduction tree
-    //@@ Write the computed sum of the block to the output vector at the 
-    //@@ correct index
 	
+	__shared__ float N[BLOCK_SIZE*2];
+	
+	int bx = blockIdx.x;
+	int tx = threadIdx.x;
+	
+	int start_index = (bx * blockDim.x + tx)*2;
+	
+
+	N[tx*2] = (start_index < len) ? input[start_index] : 0.0f;
+	N[tx*2+1] = (start_index+1 < len) ? input[start_index+1] : 0.0f;		
+
+	
+	__syncthreads();
+
+	// only one thread do the computation...	
+	if(tx == 0)
+	{		
+		for(int i=1;i<BLOCK_SIZE*2;i++)
+			N[0] += N[i];
+		
+		output[bx] = N[0];
+	}
+}
+
+__global__ void total2(float * input, float * output, int len) {	
 	__shared__ float N[BLOCK_SIZE*2];
 	
 	int bx = blockIdx.x;
@@ -34,14 +55,21 @@ __global__ void total(float * input, float * output, int len) {
 	
 	__syncthreads();
 	
-	if(tx == 0)
-	{		
-		for(int i=1;i<BLOCK_SIZE*2;i++)
-			N[0] += N[i];
+	
+	for(int s=BLOCK_SIZE;s>=1;s/=2)
+	{
+		__syncthreads();
 		
-		output[bx] = N[0];
+		if(tx < s)
+			N[tx] += N[tx + s];
 	}
+	
+	__syncthreads();
+	
+	if(tx == 0)					
+		output[bx] = N[0];	
 }
+
 
 int main(int argc, char ** argv) {
     int ii;
@@ -88,7 +116,7 @@ int main(int argc, char ** argv) {
 	
     wbTime_start(Compute, "Performing CUDA computation");
     //@@ Launch the GPU Kernel here
-	total<<<grid, block>>>(deviceInput, deviceOutput, numInputElements);
+	total2<<<grid, block>>>(deviceInput, deviceOutput, numInputElements);
 		
     cudaDeviceSynchronize();
     wbTime_stop(Compute, "Performing CUDA computation");
