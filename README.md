@@ -19,9 +19,10 @@
 | GPU Tailed | 2048 x 2048 x 3  | 17.85 ms | 22.90 |
 
 ### Histogram Normalization
-Note : I/O time is not included
-[CPU Solution](Histogram_CPU.cu)
-[GPU Solution](Histogram_GPU_v2.cu)
+
+* Note : I/O time is not included
+* [CPU Solution](Histogram_CPU.cu)
+* [GPU Solution](Histogram_GPU_v2.cu)
 
 | Method | Image Size | Hist (ms) | Corr. (ms) | Total (ms) | Speed Up (x) |
 |:------:|:----------:|:---------:|:----------:|:----------:|:------------:|
