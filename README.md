@@ -20,7 +20,8 @@
 
 ### Histogram Normalization
 Note : I/O time is not included
-
+[CPU Solution](Histogram_CPU.cu)
+[GPU Solution](Histogram_GPU_v2.cu)
 | Method | Image Size | Hist (ms) | Corr. (ms) | Total (ms) | Speed Up (x) |
 |:------:|:----------:|:---------:|:----------:|:----------:|:------------:|
 | CPU    | 256 * 256  | 0.257     | 0.730      | 0.987      | 1.00         |
