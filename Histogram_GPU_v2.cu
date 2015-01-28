@@ -67,8 +67,8 @@ int main(int argc, char ** argv) {
     //@@ Insert more code here
     float * deviceInputImageData;
     float * deviceOutputImageData;
-    uint8_t *hostGrayScaleImageData;
-    uint8_t *deviceGrayScaleImageData;
+    uint8_t *hostGreyScaleImageData;
+    uint8_t *deviceGreyScaleImageData;
     uint32_t  *hostHistogram;
     uint32_t  *deviceHistogram;
     float hostCDF[HISTOGRAM_LENGTH] = {0};    
@@ -94,7 +94,7 @@ int main(int argc, char ** argv) {
     hostInputImageData = wbImage_getData(inputImage);
     hostOutputImageData = wbImage_getData(outputImage);
 
-    hostGrayScaleImageData = (uint8_t*)malloc(grayImageLength);
+    hostGreyScaleImageData = (uint8_t*)malloc(grayImageLength);
 
     wbTime_start(Generic, "Convert to gray scale on CPU");
     for(int i=0;i<imageWidth*imageHeight;++i)
@@ -103,15 +103,15 @@ int main(int argc, char ** argv) {
         float g = hostInputImageData[i*3+1];
         float b = hostInputImageData[i*3+2];
         uint8_t y = 255.0*(0.21*r + 0.71*g + 0.07*b);
-        hostGrayScaleImageData[i] = y;
+        hostGreyScaleImageData[i] = y;
     }
     wbTime_stop(Generic, "Convert to gray scale on CPU");
 
     wbTime_start(GPU, "Copy gray image to GPU");
-    cudaMalloc((void**)&deviceGrayScaleImageData, grayImageLength);
+    cudaMalloc((void**)&deviceGreyScaleImageData, grayImageLength);
     cudaMemcpy(
-        deviceGrayScaleImageData,
-        hostGrayScaleImageData,         
+        deviceGreyScaleImageData,
+        hostGreyScaleImageData,         
         imageWidth*imageHeight*sizeof(uint8_t), 
         cudaMemcpyHostToDevice);
     wbTime_stop(GPU, "Copy gray image to GPU");
@@ -122,7 +122,7 @@ int main(int argc, char ** argv) {
     dim3 block(BLOCK_SIZE);
     dim3 grid((imageWidth*imageHeight + BLOCK_SIZE - 1)/BLOCK_SIZE);
     kernal_histogram<<<grid,block>>>(
-        deviceGrayScaleImageData, 
+        deviceGreyScaleImageData, 
         deviceHistogram, 
         imageWidth*imageHeight);
     wbTime_stop(GPU, "Compute histogram GPU");
@@ -176,6 +176,11 @@ int main(int argc, char ** argv) {
 
     //@@ insert code here
     free(hostHistogram);
+    free(hostGreyScaleImageData);
+    cudaFree(deviceGreyScaleImageData);
+    cudaFree(deviceInputImageData);
+    cudaFree(deviceOutputImageData);
+    cudaFree(deviceHistogram);
 
     return 0;
 }
